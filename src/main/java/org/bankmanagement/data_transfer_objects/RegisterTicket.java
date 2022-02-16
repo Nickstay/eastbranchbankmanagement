@@ -12,13 +12,15 @@ import javax.validation.constraints.Size;
 @Setter
 @Accessors(chain = true)
 public class RegisterTicket {
-    @NotNull
-    @Size(min = 3, max = 50)
+    @NotNull(message = "Username field must be filled")
+    @Size(min = 3, max = 50, message = "Username length shall be between 3 and 50 characters")
     private String username;
-    @NotNull
-    @Size(min = 4, max = 50)
+
+    @NotNull(message = "Password field must be filled")
+    @Size(min = 4, max = 50, message = "Password length shall be between 4 and 50 characters")
     private String password;
-    @Email
-    @NotNull
+
+    @NotNull(message = "Email field must be filled")
+    @Email(message = "Email shall match pattern: \"chosenname@domain.org\"")
     private String email;
 }

@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
@@ -13,13 +14,14 @@ import java.util.Date;
 
 @Slf4j
 @Component
+@PropertySource("classpath:security.yml")
 public class TokenManager {
 
-    @Value("${custom.security.issuer}")
+    @Value("${issuer}")
     private String issuer;
-    @Value("${custom.security.lifetime}")
+    @Value("${lifetime}")
     private int lifeTime;
-    @Value("${custom.security.secret}")
+    @Value("${secret}")
     private String secret;
 
     //    Verify token by algorithm and issuer. Verifier will check expiration date.

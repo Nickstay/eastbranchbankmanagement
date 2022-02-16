@@ -1,5 +1,5 @@
 spring:
-#  set connection to database
+  #  set connection to database
   datasource:
     url: jdbc:postgresql://localhost:5432/eastbranchmanagement
     username: eastbranchmanager
@@ -7,26 +7,16 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     database-platform:  org.hibernate.dialect.PostgreSQLDialect
-#    anti-pattern
+    #    anti-pattern
     open-in-view: false
-#    no automatic actions with schema
+    #    no automatic actions with schema
     hibernate:
       ddl-auto: none
-#  set state to database through migrations
+  #  set state to database through migrations
   flyway:
-    locations: classpath:db/migration
-#    table "user" is reserved for public schema
+    locations: classpath:migration
+    #    table "user" is reserved for public schema
     schemas: accounts
-
-#custom variables that are not hardcoded
-custom:
-  security:
-    issuer: east bank manager
-#    token lifetime in minutes
-    lifetime: 15
-#    for security measures secret must be at least 256 bits = 32 characters
-    secret: secret that is longer than 32 characters
-
 
 server:
   port: 7490

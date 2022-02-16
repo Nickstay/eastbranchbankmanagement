@@ -52,7 +52,7 @@ public class UserService {
         if (userRepo.existsByEmail(newEmail)) throw new UserAlreadyExistsByEmailException(newEmail);
         if (userRepo.existsByUsername(newName)) throw new UserAlreadyExistsByUsernameException(newName);
 
-        String newPassword = user.getPassword().equals(encoder.encode(ticket.getPassword()))
+        String newPassword = encoder.matches(ticket.getPassword(), user.getPassword())
                 ? null : ticket.getPassword();
 
         if (newEmail != null) {

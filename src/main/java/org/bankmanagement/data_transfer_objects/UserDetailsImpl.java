@@ -1,5 +1,6 @@
 package org.bankmanagement.data_transfer_objects;
 
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Setter
+@EqualsAndHashCode
 @Accessors(chain = true)
 public class UserDetailsImpl implements UserDetails {
     private String username;

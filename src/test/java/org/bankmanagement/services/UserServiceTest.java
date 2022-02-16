@@ -139,17 +139,18 @@ class UserServiceTest {
         when(userRepo.findByUsername(username)).thenReturn(Optional.ofNullable(user));
         when(userRepo.existsByEmail(any())).thenReturn(false);
         when(userRepo.existsByUsername(any())).thenReturn(false);
-        when(encoder.encode(any())).thenReturn(any());
+        when(encoder.matches(null, password)).thenReturn(false);
 
         assertThrows(UpdateRequestException.class, () -> service.updateUser(username, new UpdateTicket()));
 
         verify(userRepo).findByUsername(username);
         verify(userRepo).existsByUsername(any());
         verify(userRepo).existsByEmail(any());
-        verify(encoder, only()).encode(any());
+        verify(encoder, only()).matches(null, password);
         verifyNoMoreInteractions(userRepo);
         verifyNoInteractions(userMapper);
     }
+
 
     @Test
     public void updateUserWithSameDataShouldThrowUpdateRequestException() {
@@ -162,14 +163,14 @@ class UserServiceTest {
         when(userRepo.findByUsername(username)).thenReturn(Optional.ofNullable(user));
         when(userRepo.existsByEmail(any())).thenReturn(false);
         when(userRepo.existsByUsername(any())).thenReturn(false);
-        when(encoder.encode(password)).thenReturn(password);
+        when(encoder.matches(password, password)).thenReturn(true);
 
         assertThrows(UpdateRequestException.class, () -> service.updateUser(username, ticket));
 
         verify(userRepo).findByUsername(username);
         verify(userRepo).existsByUsername(any());
         verify(userRepo).existsByEmail(any());
-        verify(encoder, only()).encode(password);
+        verify(encoder, only()).matches(password, password);
         verifyNoMoreInteractions(userRepo);
         verifyNoInteractions(userMapper);
     }
@@ -191,6 +192,7 @@ class UserServiceTest {
         when(userRepo.findByUsername(username)).thenReturn(Optional.ofNullable(user));
         when(userRepo.existsByEmail(newEmail)).thenReturn(false);
         when(userRepo.existsByUsername(newName)).thenReturn(false);
+        when(encoder.matches(newPassword, password)).thenReturn(false);
         when(encoder.encode(newPassword)).thenReturn(newPassword);
         when(userRepo.save(user)).thenReturn(user);
         when(userMapper.mapToDto(user)).thenReturn(dto);
@@ -214,7 +216,8 @@ class UserServiceTest {
         verify(userRepo).existsByUsername(newName);
         verify(userRepo).existsByEmail(newEmail);
         verify(userMapper).mapToDto(user);
-        verify(encoder, times(2)).encode(newPassword);
+        verify(encoder).matches(newPassword, password);
+        verify(encoder).encode(newPassword);
     }
 
     @Test
