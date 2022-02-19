@@ -83,7 +83,7 @@ class RegControllerIT extends AbstractIT {
         assertAll(
                 () -> assertEquals("CONFLICT", errorResponse.getCode()),
                 () -> assertEquals(409, errorResponse.getStatus()),
-                () -> assertEquals("User already exists by eMail: test@room.try", errorResponse.getMessage())
+                () -> assertEquals("User already exists by email: test@room.try", errorResponse.getMessage())
         );
     }
 

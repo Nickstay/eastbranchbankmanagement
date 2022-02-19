@@ -139,14 +139,13 @@ class UserServiceTest {
         when(userRepo.findByUsername(username)).thenReturn(Optional.ofNullable(user));
         when(userRepo.existsByEmail(any())).thenReturn(false);
         when(userRepo.existsByUsername(any())).thenReturn(false);
-        when(encoder.matches(null, password)).thenReturn(false);
 
         assertThrows(UpdateRequestException.class, () -> service.updateUser(username, new UpdateTicket()));
 
         verify(userRepo).findByUsername(username);
         verify(userRepo).existsByUsername(any());
         verify(userRepo).existsByEmail(any());
-        verify(encoder, only()).matches(null, password);
+        verifyNoInteractions(encoder);
         verifyNoMoreInteractions(userRepo);
         verifyNoInteractions(userMapper);
     }
@@ -321,6 +320,5 @@ class UserServiceTest {
         verify(encoder).encode(password);
         verify(userMapper).mapToDto(standardUser);
     }
-
 
 }

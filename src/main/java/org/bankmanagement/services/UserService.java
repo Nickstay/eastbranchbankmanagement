@@ -12,6 +12,9 @@ import org.bankmanagement.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,46 +27,38 @@ public class UserService {
         String email = ticket.getEmail();
         String username = ticket.getUsername();
 
-        if (userRepo.existsByEmail(email)) throw new UserAlreadyExistsByEmailException(email);
-        if (userRepo.existsByUsername(username)) throw new UserAlreadyExistsByUsernameException(username);
+        checkForUniqueEmailAndUsername(email, username);
 
-        User user = new User()
-                .setEmail(email)
-                .setUsername(username)
-                .setPassword(encoder.encode(ticket.getPassword()))
-                .setRole(Role.ROLE_CLIENT)
-                .setActive(true);
+        User user = createNewUserInstance(email, username, ticket.getPassword());
 
         return userMapper.mapToDto(userRepo.save(user));
     }
 
     public UserDto getUser(String username) {
-        User user = findUser(username);
+        User user = findActiveUser(username);
         return userMapper.mapToDto(user);
     }
 
     public UserDto updateUser(String username, UpdateTicket ticket) {
-        User user = findUser(username);
+        User user = findActiveUser(username);
         boolean changed = false;
 
-        String newEmail = user.getEmail().equals(ticket.getEmail()) ? null : ticket.getEmail();
-        String newName = user.getUsername().equals(ticket.getUsername()) ? null : ticket.getUsername();
+        String newEmail = ticket.getEmail();
+        String newName = ticket.getUsername();
+        String newPassword = ticket.getPassword();
 
-        if (userRepo.existsByEmail(newEmail)) throw new UserAlreadyExistsByEmailException(newEmail);
-        if (userRepo.existsByUsername(newName)) throw new UserAlreadyExistsByUsernameException(newName);
+        checkForUniqueEmailAndUsername(newEmail, newName);
+        Predicate<String> nonNull = Objects::nonNull;
 
-        String newPassword = encoder.matches(ticket.getPassword(), user.getPassword())
-                ? null : ticket.getPassword();
-
-        if (newEmail != null) {
+        if (nonNull.test(newEmail) && !newEmail.equals(user.getEmail())) {
             user.setEmail(newEmail);
             changed = true;
         }
-        if (newName != null) {
+        if (nonNull.test(newName) && !newName.equals(user.getUsername())) {
             user.setUsername(newName);
             changed = true;
         }
-        if (newPassword != null) {
+        if (nonNull.test(newPassword) && !encoder.matches(newPassword, user.getPassword())) {
             user.setPassword(encoder.encode(newPassword));
             changed = true;
         }
@@ -74,15 +69,29 @@ public class UserService {
     }
 
     public UserDto deleteUser(String username) {
-        User user = findUser(username);
+        User user = findActiveUser(username);
         user.setActive(false);
         return userMapper.mapToDto(userRepo.save(user));
     }
 
-    private User findUser(String username) {
+    private User createNewUserInstance(String email, String username, String rawPassword) {
+        return new User()
+                .setEmail(email)
+                .setUsername(username)
+                .setPassword(encoder.encode(rawPassword))
+                .setRole(Role.ROLE_CLIENT)
+                .setActive(true);
+    }
+
+    private User findActiveUser(String username) {
         User user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
         if (!user.isActive()) throw new UserIsDisabledException(username);
         return user;
+    }
+
+    private void checkForUniqueEmailAndUsername(String email, String username) {
+        if (userRepo.existsByEmail(email)) throw new UserAlreadyExistsByEmailException(email);
+        if (userRepo.existsByUsername(username)) throw new UserAlreadyExistsByUsernameException(username);
     }
 }
